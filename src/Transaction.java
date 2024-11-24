@@ -1,3 +1,4 @@
+
 import java.security.PublicKey;
 import java.security.PrivateKey;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class Transaction {
     public byte[] signature;
 
     public ArrayList<TransactionInput> inputs = new ArrayList<>();
-    public ArrayList<TransactionOutputs> outputs = new ArrayList<>();
+    public ArrayList<TransactionOutput> outputs = new ArrayList<>();
 
     private static int sequence = 0; //verrà aggiunto alle transazioni
 
@@ -40,7 +41,7 @@ public class Transaction {
         }
         //Transaction inputs
         for(TransactionInput input : inputs){
-            input.UTXO = BlockChain.UTXSOs.get(input.transactionOutputId);
+            input.UTXO = BlockChain.UTXOs.get(input.transactionOutputId);
         }
         //controllo se a transazione è valida
         if(getInputsValue() < BlockChain.minimumTransaction){
@@ -50,17 +51,17 @@ public class Transaction {
         //genereo output
         float leftOver = getInputsValue() - value; //Calcolo del resto
         transactionId = calculateHash();
-        outputs.add(new TransactionOutputs(this.reciepient,value,transactionId));
-        outputs.add(new TransactionOutputs(this.sender,leftOver,transactionId));
+        outputs.add(new TransactionOutput(this.reciepient,value,transactionId));
+        outputs.add(new TransactionOutput(this.sender,leftOver,transactionId));
 
         //add outputs to unspent list
-        for(TransactionOutputs o : outputs){
-            BlockChain.UTXSOs.put(o.id,o);
+        for(TransactionOutput o : outputs){
+            BlockChain.UTXOs.put(o.id,o);
         }
         //rimuovo gli input dalle UTXO
         for(TransactionInput i : inputs){
             if(i.UTXO == null)continue;
-            BlockChain.UTXSOs.remove(i.UTXO.id);
+            BlockChain.UTXOs.remove(i.UTXO.id);
         }
         return true;
     }
@@ -76,7 +77,7 @@ public class Transaction {
     //Somma degli output
     public float getOutputsValue(){
         float total = 0;
-        for(TransactionOutputs o : outputs){
+        for(TransactionOutput o : outputs){
             total += o.value;
         }
         return total;
